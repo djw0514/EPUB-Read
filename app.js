@@ -19,7 +19,7 @@ class EpubReader {
         this.currentBookInfo = null;
         this.isChangingChapter = false;
 
-        // 设置选项
+        // 设置选项（默认值）
         this.settings = {
             fontSize: 18,
             fontFamily: 'default',
@@ -33,6 +33,9 @@ class EpubReader {
             spread: 'none' // none 或 auto (双页模式)
         };
 
+        // 加载保存的设置
+        this.loadSettings();
+
         // 书架数据
         this.bookshelf = this.loadBookshelf();
 
@@ -40,6 +43,7 @@ class EpubReader {
         this.initElements();
         this.bindEvents();
         this.applySettings();
+        this.applyInitialSettings(); // 应用加载的设置到UI
         this.renderBookshelf();
     }
 
@@ -135,6 +139,7 @@ class EpubReader {
         this.fontFamilySelect.addEventListener('change', (e) => {
             this.settings.fontFamily = e.target.value;
             this.applySettingsToAllContent();
+            this.saveSettings(); // 保存设置
         });
 
         // 显示模式选择
@@ -142,6 +147,7 @@ class EpubReader {
             this.settings.displayMode = e.target.value;
             this.settings.spread = this.settings.displayMode === 'double' ? 'auto' : 'none';
             this.recreateRendition();
+            this.saveSettings(); // 保存设置
         });
 
         // 主题切换
@@ -158,11 +164,13 @@ class EpubReader {
         this.customBgColor.addEventListener('input', (e) => {
             this.settings.customBgColor = e.target.value;
             this.applySettingsToAllContent();
+            this.saveSettings(); // 保存设置
         });
 
         this.customTextColor.addEventListener('input', (e) => {
             this.settings.customTextColor = e.target.value;
             this.applySettingsToAllContent();
+            this.saveSettings(); // 保存设置
         });
 
         // 行距控制
@@ -170,6 +178,7 @@ class EpubReader {
             this.settings.lineHeight = parseFloat(e.target.value);
             this.lineHeightDisplay.textContent = this.settings.lineHeight;
             this.applySettingsToAllContent();
+            this.saveSettings(); // 保存设置
         });
 
         // 页边距控制
@@ -177,6 +186,7 @@ class EpubReader {
             this.settings.padding = parseInt(e.target.value);
             this.paddingDisplay.textContent = this.settings.padding + 'px';
             this.applySettingsToAllContent();
+            this.saveSettings(); // 保存设置
         });
 
         // 亮度控制
@@ -184,6 +194,7 @@ class EpubReader {
             this.settings.brightness = parseInt(e.target.value);
             this.brightnessDisplay.textContent = this.settings.brightness + '%';
             this.applySettings();
+            this.saveSettings(); // 保存设置
         });
 
         // 键盘快捷键
@@ -526,6 +537,7 @@ class EpubReader {
             this.settings.fontSize = newSize;
             this.fontSizeDisplay.textContent = newSize + 'px';
             this.applySettingsToAllContent();
+            this.saveSettings(); // 保存设置
         }
     }
 
@@ -533,6 +545,7 @@ class EpubReader {
         this.settings.theme = theme;
         document.body.classList.remove('theme-light', 'theme-sepia', 'theme-dark', 'theme-green');
         document.body.classList.add(`theme-${theme}`);
+        this.saveSettings(); // 保存设置
     }
 
     updateThemeButtons(activeTheme) {
@@ -707,6 +720,71 @@ class EpubReader {
         } catch (e) {
             console.error('保存书架失败:', e);
         }
+    }
+
+    /**
+     * 加载保存的设置
+     */
+    loadSettings() {
+        try {
+            const data = localStorage.getItem('epub-reader-settings');
+            if (data) {
+                const savedSettings = JSON.parse(data);
+                // 合并保存的设置到默认设置
+                this.settings = { ...this.settings, ...savedSettings };
+            }
+        } catch (e) {
+            console.error('加载设置失败:', e);
+        }
+    }
+
+    /**
+     * 保存设置到本地存储
+     */
+    saveSettings() {
+        try {
+            localStorage.setItem('epub-reader-settings', JSON.stringify(this.settings));
+        } catch (e) {
+            console.error('保存设置失败:', e);
+        }
+    }
+
+    /**
+     * 应用加载的设置到UI控件
+     */
+    applyInitialSettings() {
+        // 更新UI控件的值
+        if (this.fontSizeDisplay) {
+            this.fontSizeDisplay.textContent = this.settings.fontSize + 'px';
+        }
+        if (this.fontFamilySelect) {
+            this.fontFamilySelect.value = this.settings.fontFamily;
+        }
+        if (this.displayModeSelect) {
+            this.displayModeSelect.value = this.settings.displayMode;
+        }
+        if (this.lineHeightSlider) {
+            this.lineHeightSlider.value = this.settings.lineHeight;
+            this.lineHeightDisplay.textContent = this.settings.lineHeight;
+        }
+        if (this.paddingSlider) {
+            this.paddingSlider.value = this.settings.padding;
+            this.paddingDisplay.textContent = this.settings.padding + 'px';
+        }
+        if (this.brightnessSlider) {
+            this.brightnessSlider.value = this.settings.brightness;
+            this.brightnessDisplay.textContent = this.settings.brightness + '%';
+        }
+        if (this.customBgColor) {
+            this.customBgColor.value = this.settings.customBgColor;
+        }
+        if (this.customTextColor) {
+            this.customTextColor.value = this.settings.customTextColor;
+        }
+        
+        // 应用主题
+        this.setTheme(this.settings.theme);
+        this.updateThemeButtons(this.settings.theme);
     }
 
     addToBookshelf(bookInfo, bookData) {
