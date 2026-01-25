@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPUB 在线阅读器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="toolbar">
+        <div class="toolbar-left">
+            <h1>EPUB 在线阅读器</h1>
+        </div>
+        <div class="toolbar-center">
+            <button id="prevBtn" class="toolbar-btn" title="上一页" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15,18 9,12 15,6"></polyline>
+                </svg>
+            </button>
+            <span id="pageInfo">0 / 0</span>
+            <button id="nextBtn" class="toolbar-btn" title="下一页" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9,18 15,12 9,6"></polyline>
+                </svg>
+            </button>
+        </div>
+        <div class="toolbar-right">
+            <button id="importBtn" class="toolbar-btn" title="导入书籍">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17,8 12,3 7,8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </button>
+            <button id="bookshelfBtn" class="toolbar-btn" title="我的书架">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+            </button>
+            <button id="settingsBtn" class="toolbar-btn" title="设置">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+            <button id="tocBtn" class="toolbar-btn" title="目录">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <aside id="tocPanel" class="toc-panel">
+            <div class="panel-header">
+                <h3>目录</h3>
+                <button id="closeToc" class="close-btn">&times;</button>
+            </div>
+            <div id="tocList" class="toc-list">
+                <p class="placeholder-text">请先打开一个EPUB文件</p>
+            </div>
+        </aside>
+
+        <div id="readerContainer" class="reader-container">
+            <div id="uploadArea" class="upload-area">
+                <div class="upload-content">
+                    <svg class="upload-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <h2>拖拽 EPUB 文件到这里</h2>
+                    <p>或者</p>
+                    <label for="fileInput" class="upload-btn">
+                        选择文件
+                    </label>
+                    <input type="file" id="fileInput" accept=".epub" style="display: none;">
+                    <p class="upload-hint">支持 .epub 格式的电子书</p>
+                </div>
+            </div>
+
+            <div id="epubViewer" class="epub-viewer"></div>
+        </div>
+
+        <aside id="settingsPanel" class="settings-panel">
+            <div class="panel-header">
+                <h3>阅读设置</h3>
+                <button id="closeSettings" class="close-btn">&times;</button>
+            </div>
+
+            <div class="settings-section">
+                <h4>字体大小</h4>
+                <div class="font-controls">
+                    <button id="decreaseFont" class="font-btn">A-</button>
+                    <span id="fontSizeDisplay">18px</span>
+                    <button id="increaseFont" class="font-btn">A+</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>字体样式</h4>
+                <select id="fontFamily" class="setting-select">
+                    <option value="default">默认字体</option>
+                    <option value="'SimSun', 'STSong', serif">宋体</option>
+                    <option value="'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif">微软雅黑</option>
+                    <option value="'SimHei', 'STHeiti', sans-serif">黑体</option>
+                    <option value="'KaiTi', 'STKaiti', serif">楷体</option>
+                    <option value="'FangSong', 'STFangsong', serif">仿宋</option>
+                    <option value="'Courier New', 'Consolas', monospace">等宽字体</option>
+                </select>
+            </div>
+
+            <div class="settings-section">
+                <h4>显示模式</h4>
+                <select id="displayMode" class="setting-select">
+                    <option value="single">单页模式</option>
+                    <option value="double">双页模式</option>
+                </select>
+            </div>
+
+            <div class="settings-section">
+                <h4>背景主题</h4>
+                <div class="theme-options">
+                    <button class="theme-btn active" data-theme="light" title="亮色模式">
+                        <div class="theme-preview light-preview"></div>
+                        <span>亮色</span>
+                    </button>
+                    <button class="theme-btn" data-theme="sepia" title="护眼模式">
+                        <div class="theme-preview sepia-preview"></div>
+                        <span>护眼</span>
+                    </button>
+                    <button class="theme-btn" data-theme="dark" title="深色模式">
+                        <div class="theme-preview dark-preview"></div>
+                        <span>深色</span>
+                    </button>
+                    <button class="theme-btn" data-theme="green" title="绿色护眼">
+                        <div class="theme-preview green-preview"></div>
+                        <span>绿意</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>自定义背景色</h4>
+                <input type="color" id="customBgColor" value="#ffffff" class="color-picker">
+                <input type="color" id="customTextColor" value="#333333" class="color-picker">
+            </div>
+
+            <div class="settings-section">
+                <h4>行距</h4>
+                <input type="range" id="lineHeight" min="1" max="3" step="0.1" value="1.6" class="range-input">
+                <span id="lineHeightDisplay">1.6</span>
+            </div>
+
+            <div class="settings-section">
+                <h4>页边距</h4>
+                <input type="range" id="padding" min="0" max="100" step="5" value="40" class="range-input">
+                <span id="paddingDisplay">40px</span>
+            </div>
+
+            <div class="settings-section">
+                <h4>亮度</h4>
+                <input type="range" id="brightness" min="50" max="150" step="5" value="100" class="range-input">
+                <span id="brightnessDisplay">100%</span>
+            </div>
+        </aside>
+
+        <aside id="bookshelfPanel" class="bookshelf-panel">
+            <div class="panel-header">
+                <h3>我的书架</h3>
+                <button id="closeBookshelf" class="close-btn">&times;</button>
+            </div>
+            <div id="bookshelfList" class="bookshelf-list">
+                <p class="placeholder-text">书架是空的，点击右下角的导入按钮添加书籍</p>
+            </div>
+        </aside>
+    </main>
+
+    <div id="progressBar" class="progress-bar">
+        <div id="progress" class="progress"></div>
+    </div>
+
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    
+    <script src="https://unpkg.com/epubjs@0.3.93/dist/epub.min.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>
