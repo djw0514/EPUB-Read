@@ -538,7 +538,7 @@ body {
 .theme-options {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 8px;
 }
 
 .theme-btn {
@@ -552,6 +552,12 @@ body {
     background-color: #fff;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+/* 自定义主题按钮放在第一列第二行（亮色下方） */
+.theme-btn[data-theme="custom"] {
+    grid-column: 1;
+    grid-row: 2;
 }
 
 .theme-btn:hover {
@@ -586,6 +592,10 @@ body {
     background-color: #e8f5e9;
 }
 
+.custom-preview {
+    background: linear-gradient(135deg, #ffffff 50%, #333333 50%);
+}
+
 .theme-btn span {
     font-size: 0.75rem;
     color: #666;
@@ -599,6 +609,29 @@ body {
     border-radius: 8px;
     cursor: pointer;
     margin-bottom: 10px;
+}
+
+/* 自定义配色组 */
+.color-setting-group {
+    display: flex;
+    gap: 15px;
+}
+
+.color-setting-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.color-setting-item label {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.color-setting-item .color-picker {
+    margin-bottom: 0;
 }
 
 /* 范围输入框 */

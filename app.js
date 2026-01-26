@@ -163,12 +163,20 @@ class EpubReader {
         // 自定义颜色
         this.customBgColor.addEventListener('input', (e) => {
             this.settings.customBgColor = e.target.value;
+            this.settings.theme = 'custom';
+            this.setTheme('custom');
+            this.updateThemeButtons('custom');
+            this.updateCustomThemePreview();
             this.applySettingsToAllContent();
             this.saveSettings(); // 保存设置
         });
 
         this.customTextColor.addEventListener('input', (e) => {
             this.settings.customTextColor = e.target.value;
+            this.settings.theme = 'custom';
+            this.setTheme('custom');
+            this.updateThemeButtons('custom');
+            this.updateCustomThemePreview();
             this.applySettingsToAllContent();
             this.saveSettings(); // 保存设置
         });
@@ -543,7 +551,7 @@ class EpubReader {
 
     setTheme(theme) {
         this.settings.theme = theme;
-        document.body.classList.remove('theme-light', 'theme-sepia', 'theme-dark', 'theme-green');
+        document.body.classList.remove('theme-light', 'theme-sepia', 'theme-dark', 'theme-green', 'theme-custom');
         document.body.classList.add(`theme-${theme}`);
         this.saveSettings(); // 保存设置
     }
@@ -556,6 +564,13 @@ class EpubReader {
                 btn.classList.remove('active');
             }
         });
+    }
+
+    updateCustomThemePreview() {
+        const customPreview = document.querySelector('.custom-preview');
+        if (customPreview) {
+            customPreview.style.background = `linear-gradient(135deg, ${this.settings.customBgColor} 50%, ${this.settings.customTextColor} 50%)`;
+        }
     }
 
     applySettings() {
@@ -613,7 +628,8 @@ class EpubReader {
             case 'sepia': bgColor = '#f4ecd8'; textColor = '#5c4b37'; break;
             case 'dark': bgColor = '#2d2d2d'; textColor = '#e0e0e0'; break;
             case 'green': bgColor = '#e8f5e9'; textColor = '#2e7d32'; break;
-            default: bgColor = this.settings.customBgColor; textColor = this.settings.customTextColor;
+            case 'custom': bgColor = this.settings.customBgColor; textColor = this.settings.customTextColor; break;
+            default: bgColor = '#ffffff'; textColor = '#333333';
         }
 
         const cssId = 'reader-custom-styles';
@@ -647,8 +663,8 @@ class EpubReader {
             img { 
                 max-width: 100% !important; 
                 height: auto !important; 
-                display: block !important;
-                margin: 0 auto !important;
+                display: inline-block !important;
+                vertical-align: middle !important;
             }
         `;
     }
@@ -785,6 +801,7 @@ class EpubReader {
         // 应用主题
         this.setTheme(this.settings.theme);
         this.updateThemeButtons(this.settings.theme);
+        this.updateCustomThemePreview();
     }
 
     addToBookshelf(bookInfo, bookData) {

@@ -144,13 +144,25 @@
                         <div class="theme-preview green-preview"></div>
                         <span>绿意</span>
                     </button>
+                    <button class="theme-btn" data-theme="custom" title="自定义配色">
+                        <div class="theme-preview custom-preview"></div>
+                        <span>自定义</span>
+                    </button>
                 </div>
             </div>
 
             <div class="settings-section">
-                <h4>自定义背景色</h4>
-                <input type="color" id="customBgColor" value="#ffffff" class="color-picker">
-                <input type="color" id="customTextColor" value="#333333" class="color-picker">
+                <h4>自定义配色</h4>
+                <div class="color-setting-group">
+                    <div class="color-setting-item">
+                        <label for="customBgColor">背景色</label>
+                        <input type="color" id="customBgColor" value="#ffffff" class="color-picker">
+                    </div>
+                    <div class="color-setting-item">
+                        <label for="customTextColor">文字色</label>
+                        <input type="color" id="customTextColor" value="#333333" class="color-picker">
+                    </div>
+                </div>
             </div>
 
             <div class="settings-section">
