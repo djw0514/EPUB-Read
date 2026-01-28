@@ -467,10 +467,10 @@ class EpubReader {
             // 检查是否真的翻页了
             if (this.currentLocation && startCfi && this.currentLocation.start.cfi === startCfi) {
                 // 没有翻页，可能已经到达开头
-                this.showNotification('已经是第一页了');
+                // this.showNotification('已经是第一页了');
             }
         }).catch(() => {
-            this.showNotification('已经是第一页了');
+            // this.showNotification('已经是第一页了');
         });
     }
 
@@ -483,10 +483,10 @@ class EpubReader {
             // 检查是否真的翻页了
             if (this.currentLocation && startCfi && this.currentLocation.start.cfi === startCfi) {
                 // 没有翻页，可能已经到达结尾
-                this.showNotification('已经是最后一页了');
+                // this.showNotification('已经是最后一页了');
             }
         }).catch(() => {
-            this.showNotification('已经是最后一页了');
+            // this.showNotification('已经是最后一页了');
         });
     }
 
