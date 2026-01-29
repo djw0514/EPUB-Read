@@ -341,34 +341,25 @@ class EpubReader {
 
     loadEpub(file) {
         const reader = new FileReader();
-
         reader.onload = (e) => {
             this.bookData = e.target.result;
             const fileName = file.name;
 
             try {
                 this.book = ePub(this.bookData);
+                
+                // 默认信息，防止 metadata 加载失败
+                this.currentBookInfo = {
+                    title: fileName.replace('.epub', ''),
+                    author: '未知作者',
+                    cover: null,
+                    fileName: fileName,
+                    lastRead: new Date().toISOString(),
+                    progress: 0
+                };
 
-                this.book.loaded.metadata.then((metadata) => {
-                    this.currentBookInfo = {
-                        title: metadata.title || fileName,
-                        author: metadata.creator || '未知作者',
-                        cover: null,
-                        fileName: fileName,
-                        lastRead: new Date().toISOString(),
-                        progress: 0
-                    };
-
-                    this.book.loaded.cover.then((coverData) => {
-                        if (coverData) {
-                            this.currentBookInfo.cover = coverData;
-                        }
-                        this.addToBookshelf(this.currentBookInfo, this.bookData);
-                    }).catch(() => {
-                        this.addToBookshelf(this.currentBookInfo, this.bookData);
-                    });
-                });
-
+                // 并行处理：渲染书籍 + 获取元数据保存
+                // 1. 渲染 (UI)
                 this.rendition = this.book.renderTo('epubViewer', {
                     width: '100%',
                     height: '100%',
@@ -376,9 +367,8 @@ class EpubReader {
                     manager: 'default',
                     spread: this.settings.spread
                 });
-
+                // ... (设置 Attribute 和 hook) ...
                 this.epubViewer.setAttribute('data-viewer', this.settings.displayMode);
-
                 this.rendition.hooks.content.register((contents) => {
                     this.applySettingsToIframe(contents);
                 });
@@ -388,18 +378,19 @@ class EpubReader {
                     this.epubViewer.style.display = 'block';
                     this.loadTableOfContents();
                     this.updatePageInfo();
+                    // 只有渲染成功才保存，避免保存坏文件
+                    this.saveBookInfoWithMetadata(); 
                     
                     this.book.locations.generate(1000).then(() => {
                         this.updateProgress();
                     });
-
+                    // ... (事件监听) ...
                     this.rendition.on('relocated', (location) => {
                         this.currentLocation = location;
                         this.updatePageInfo();
                         this.updateProgress();
                         this.saveReadingProgress();
                     });
-
                     this.applySettingsToAllContent();
                     this.showNotification('电子书加载成功！');
                 }).catch(err => {
@@ -412,12 +403,25 @@ class EpubReader {
                 this.showNotification('加载电子书失败，请检查文件格式');
             }
         };
-
-        reader.onerror = () => {
-            this.showNotification('读取文件失败');
-        };
-
         reader.readAsArrayBuffer(file);
+    }
+
+    // 辅助方法：分离元数据获取逻辑
+    saveBookInfoWithMetadata() {
+        Promise.all([
+            this.book.loaded.metadata.catch(() => null),
+            this.book.loaded.cover.catch(() => null)
+        ]).then(([metadata, coverUrl]) => {
+            if (metadata) {
+                this.currentBookInfo.title = metadata.title || this.currentBookInfo.title;
+                this.currentBookInfo.author = metadata.creator || this.currentBookInfo.author;
+            }
+            // 注意：这里仍然存在 LocalStorage 容量风险，建议限制 cover 大小
+            if (coverUrl && typeof coverUrl === 'string' && coverUrl.length < 50000) { 
+                this.currentBookInfo.cover = coverUrl;
+            }
+            this.addToBookshelf(this.currentBookInfo, this.bookData);
+        });
     }
 
     loadTableOfContents() {
@@ -609,7 +613,11 @@ class EpubReader {
             doc = iframe.contentDocument;
         }
 
-        if (!doc || !doc.head) return;
+        if (!doc) return;
+        if (!doc.head) {
+            const head = doc.createElement('head');
+            doc.appendChild(head);
+        }
 
         const fontSize = this.settings.fontSize + 'px';
         
@@ -669,20 +677,20 @@ class EpubReader {
         `;
     }
 
-    togglePanel(panel) {
-        if (panel === this.settingsPanel) {
-            this.closePanel(this.tocPanel);
-            this.closePanel(this.bookshelfPanel);
-        } else if (panel === this.tocPanel) {
-            this.closePanel(this.settingsPanel);
-            this.closePanel(this.bookshelfPanel);
-        } else if (panel === this.bookshelfPanel) {
-            this.closePanel(this.settingsPanel);
-            this.closePanel(this.tocPanel);
-            this.renderBookshelf();
-        }
-        panel.classList.toggle('active');
-    }
+    // togglePanel(panel) {
+    //     if (panel === this.settingsPanel) {
+    //         this.closePanel(this.tocPanel);
+    //         this.closePanel(this.bookshelfPanel);
+    //     } else if (panel === this.tocPanel) {
+    //         this.closePanel(this.settingsPanel);
+    //         this.closePanel(this.bookshelfPanel);
+    //     } else if (panel === this.bookshelfPanel) {
+    //         this.closePanel(this.settingsPanel);
+    //         this.closePanel(this.tocPanel);
+    //         this.renderBookshelf();
+    //     }
+    //     panel.classList.toggle('active');
+    // }
 
     closePanel(panel) {
         panel.classList.remove('active');
